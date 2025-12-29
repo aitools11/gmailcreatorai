@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gmail Creator Bot (Ultimate Premium)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Google+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* --- 1. RESET & CORE STYLES --- */
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body { 
+            font-family: 'Poppins', sans-serif; 
+            background: #f0f4f8; 
+            height: 100vh; 
+            overflow: hidden; 
+            display: flex; 
+            flex-direction: column; 
+            user-select: none; 
+        }
+        
+        .screen { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #ffffff; display: none; flex-direction: column; 
+            padding-bottom: 70px; /* Space for bottom bar */
+        }
+        .screen.active { display: flex; }
+
+        /* --- 2. PREMIUM COMPONENTS --- */
+        
+        /* Buttons */
+        .btn-primary { 
+            width: 100%; max-width: 320px; padding: 15px; 
+            background: linear-gradient(135deg, #1a73e8, #0d47a1); 
+            color: white; border: none; border-radius: 12px; 
+            font-weight: 600; font-size: 16px; cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(26, 115, 232, 0.4);
+            transition: all 0.2s ease;
+            display: flex; justify-content: center; align-items: center; gap: 10px;
+        }
+        .btn-primary:active { transform: scale(0.98); box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3); }
+
+        .btn-gold {
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+            box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+        }
+
+        .btn-secondary {
+            width: 100%; max-width: 320px; padding: 12px; margin-top: 15px;
+            background: #ffffff; color: #5f6368; border: 2px solid #f1f3f4; 
+            border-radius: 12px; font-weight: 600; font-size: 14px; cursor: pointer; 
+            transition: 0.2s;
+        }
+        .btn-secondary:hover { background: #f8f9fa; border-color: #dadce0; }
+
+        /* Inputs */
+        .c-group { width: 100%; max-width: 320px; margin-bottom: 25px; }
+        .c-label { font-size: 13px; color: #5f6368; margin-bottom: 8px; display: block; font-weight: 500; letter-spacing: 0.5px; }
+        .c-input { 
+            width: 100%; padding: 15px; border: 2px solid #f1f3f4; 
+            border-radius: 12px; font-size: 16px; outline: none; transition: 0.3s;
+            background: #fafafa; color: #202124; font-family: 'Google Sans', sans-serif;
+        }
+        .c-input:focus { border-color: #1a73e8; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+
+        /* Toast Notifications (Premium Look) */
+        #toast-box {
+            position: fixed; top: -80px; left: 50%; transform: translateX(-50%);
+            background: #202124; color: #fff; padding: 14px 25px; border-radius: 50px;
+            font-size: 14px; font-weight: 500; z-index: 10000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); 
+            display: flex; align-items: center; gap: 12px;
+            width: 90%; max-width: 380px; justify-content: center;
+            transition: top 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        }
+        #toast-box.active { top: 20px; }
+        #toast-box.success { background: linear-gradient(135deg, #34a853, #0f9d58); }
+        #toast-box.error { background: linear-gradient(135deg, #ea4335, #c5221f); }
+        #toast-box i { font-size: 18px; }
+
+        /* Popups (Glassmorphism) */
+        .popup-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); z-index: 9999; display: none;
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
+        }
+        .popup-box {
+            background: white; padding: 40px 30px; border-radius: 24px;
+            text-align: center; max-width: 85%; width: 340px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative; overflow: hidden;
+        }
+        .popup-box::before {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(26,115,232,0.05) 0%, rgba(255,255,255,0) 70%);
+            z-index: -1;
+        }
+        .popup-icon { font-size: 60px; margin-bottom: 20px; display: block; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
+        .popup-h { font-size: 24px; font-weight: 700; color: #202124; margin-bottom: 10px; font-family: 'Google Sans', sans-serif; }
+        .popup-p { font-size: 15px; color: #5f6368; margin-bottom: 30px; line-height: 1.5; }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        /* --- 3. SCREEN SPECIFIC STYLES --- */
+
+        /* Activation */
+        #activation-screen { justify-content: center; align-items: center; background: #fff; }
+        .premium-badge {
+            background: linear-gradient(90deg, #FFD700, #FFA500);
+            color: #fff; padding: 6px 18px; border-radius: 20px; font-size: 11px; font-weight: 800;
+            margin-bottom: 30px; box-shadow: 0 4px 15px rgba(255, 165, 0, 0.4);
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+        .btn-get-code { 
+            background: #e8f0fe; color: #1a73e8; padding: 14px; border-radius: 12px; border: none; 
+            font-weight: 600; font-size: 14px; cursor: pointer; display: flex; 
+            justify-content: center; align-items: center; gap: 8px; width: 100%; 
+            transition: 0.2s;
+        }
+        .btn-get-code:hover { background: #d2e3fc; }
+
+        /* Config */
+        #config-screen { justify-content: center; align-items: center; }
+        #secret-btn { position: absolute; top: 0; left: 0; width: 80px; height: 80px; background: transparent; border: none; cursor: pointer; z-index: 2001; }
+
+        /* Manual Input */
+        #manual-screen { padding: 20px; }
+        .manual-item { 
+            padding: 15px; border-bottom: 1px solid #f1f3f4; display: flex; justify-content: space-between; align-items: center;
+            background: #fff; margin-bottom: 8px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        /* Simulation (Google Clone) */
+        .g-header { text-align: center; margin-bottom: 30px; padding: 0 20px; margin-top: 40px; }
+        .g-logo-small { width: 75px; margin: 0 auto 10px auto; display: block; }
+        .g-title { font-family: 'Google Sans', sans-serif; font-size: 24px; color: #202124; margin-bottom: 10px; }
+        .g-sub { font-size: 16px; color: #202124; }
+        .g-body { padding: 0 24px; }
+        .mat-group { position: relative; margin-bottom: 25px; }
+        .mat-input { 
+            width: 100%; padding: 13px 15px; border: 1px solid #dadce0; border-radius: 4px; 
+            font-size: 16px; color: #202124; outline: none; background: transparent; transition: 0.2s; 
+        }
+        .mat-input.active, .mat-input.filled, .mat-input:focus { border: 2px solid #1a73e8; padding: 12px 14px; }
+        .mat-label { 
+            position: absolute; left: 12px; top: 14px; background: #fff; padding: 0 4px; 
+            color: #5f6368; font-size: 16px; pointer-events: none; transition: 0.2s; 
+        }
+        .mat-input.active ~ .mat-label, .mat-input.filled ~ .mat-label, .mat-input:focus ~ .mat-label { top: -9px; font-size: 12px; color: #1a73e8; font-weight: 500; }
+        .g-footer { position: absolute; bottom: 40px; right: 24px; }
+        .btn-next { background: #1a73e8; color: white; border: none; padding: 10px 24px; border-radius: 4px; font-weight: 500; font-size: 14px; }
+        
+        .date-box { border: 1px solid #dadce0; border-radius: 4px; padding: 12px; flex: 1; text-align: center; font-size: 16px; color: #202124; height: 48px; display: flex; align-items: center; justify-content: center; }
+        
+        /* Loader */
+        #checking-screen { justify-content: center; align-items: center; }
+        .loader-box { margin-top: 30px; }
+        .circular { animation: rotate 2s linear infinite; height: 60px; width: 60px; }
+        .path { stroke-dasharray: 1, 200; stroke-dashoffset: 0; stroke: #1a73e8; stroke-width: 3; stroke-linecap: round; animation: dash 1.5s ease-in-out infinite; }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+        @keyframes dash { 0% { stroke-dasharray: 1, 200; stroke-dashoffset: 0; } 50% { stroke-dasharray: 89, 200; stroke-dashoffset: -35; } 100% { stroke-dasharray: 89, 200; stroke-dashoffset: -124; } }
+
+        /* Results */
+        #result-screen { background: #f8f9fa; padding: 20px; overflow-y: auto; padding-bottom: 120px; }
+        .res-item { 
+            background: #fff; padding: 20px; border-radius: 16px; margin-bottom: 15px; 
+            border-left: 6px solid #34a853; position: relative; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03); transition: transform 0.1s;
+        }
+        .res-item:active { transform: scale(0.99); }
+        
+        .res-email { 
+            font-weight: 600; color: #1a73e8; font-size: 16px; margin-bottom: 8px; 
+            cursor: pointer; display: flex; align-items: center; gap: 8px;
+        }
+        .res-pass-text { font-family: monospace; font-size: 15px; color: #202124; background: #f1f3f4; padding: 4px 8px; border-radius: 4px; display: none; }
+        .res-pass-text.visible { display: inline-block; }
+        
+        /* Upgrade Card Style */
+        .upgrade-card {
+            background: #fff8e1; border: 1px solid #ffe082; padding: 15px; border-radius: 12px;
+            text-align: center; margin-bottom: 20px; animation: slideDown 0.5s;
+        }
+        .upgrade-title { color: #f57f17; font-weight: 700; font-size: 16px; margin-bottom: 5px; }
+        .upgrade-desc { color: #5f6368; font-size: 13px; margin-bottom: 10px; }
+
+        .action-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .btn-icon { 
+            background: #e8f0fe; border: none; color: #1a73e8; cursor: pointer; 
+            width: 36px; height: 36px; border-radius: 50%; display: flex; 
+            justify-content: center; align-items: center; transition: 0.2s;
+        }
+        .btn-icon:hover { background: #d2e3fc; }
+
+        .btn-copy-all { 
+            position: fixed; bottom: 20px; right: 20px; left: 20px; 
+            background: linear-gradient(135deg, #1a73e8, #174ea6); color: white; 
+            padding: 16px; text-align: center; border-radius: 30px; font-weight: 600; 
+            box-shadow: 0 10px 30px rgba(26, 115, 232, 0.3); border: none; cursor: pointer; 
+            font-size: 16px; z-index: 5001;
+        }
+
+        /* Status Bar */
+        #status-bar { 
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 70px; 
+            background: #fff; display: none; justify-content: space-between; 
+            align-items: center; padding: 0 25px; z-index: 5000; 
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05); border-radius: 20px 20px 0 0;
+        }
+        .btn-stop { 
+            background: #fce8e6; color: #d93025; border: none; padding: 8px 20px; 
+            border-radius: 20px; font-weight: 700; cursor: pointer; font-size: 13px; 
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-box">
+        <i class="fas fa-info-circle"></i>
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- PREMIUM SUCCESS POPUP -->
+    <div id="success-popup" class="popup-overlay">
+        <div class="popup-box">
+            <i class="fas fa-gem popup-icon" style="color:#34a853;"></i>
+            <div class="popup-h" id="popup-title">Premium Unlocked</div>
+            <div class="popup-p" id="popup-desc">You are now ready to generate accounts.</div>
+            <button class="btn-primary" onclick="closeSuccessPopup()">Let's Start <i class="fas fa-arrow-right"></i></button>
+        </div>
+    </div>
+
+    <!-- UPGRADE POPUP -->
+    <div id="upgrade-popup" class="popup-overlay">
+        <div class="popup-box">
+            <i class="fas fa-lock popup-icon" style="color:#ea4335;"></i>
+            <div class="popup-h">Access Restricted</div>
+            <div class="popup-p">You are currently on the <b>Basic Plan</b>. Upgrade to Premium to unlock password viewing.</div>
+            <button class="btn-primary btn-gold" onclick="redirectToSupport()">Contact Customer Support <i class="fab fa-telegram-plane"></i></button>
+            <button class="btn-secondary" onclick="closeUpgradePopup()" style="width:auto; border:none; margin-top:10px;">Close</button>
+        </div>
+    </div>
+
+    <!-- 1. ACTIVATION SCREEN -->
+    <div id="activation-screen" class="screen active">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" class="gmail-logo" style="width:80px; margin-bottom:15px;">
+        <h2 class="app-title">Gmail Creator AI</h2>
+        <div class="premium-badge"><i class="fas fa-crown"></i> ULTIMATE 2025</div>
+        
+        <div class="c-group">
+            <label class="c-label">Enter License Key</label>
+            <input type="text" id="activation-code-input" class="c-input" placeholder="XXXX-XXXX-XXXX">
+        </div>
+
+        <button class="btn-primary" id="activate-button" onclick="checkActivationCode()">Unlock Access</button>
+        
+        <div id="activation-loader" style="display:none; margin-top:20px; color:#1a73e8; font-weight:600;">
+            <i class="fas fa-circle-notch fa-spin"></i> Checking Server...
+        </div>
+
+        <div class="c-group" style="margin-top:40px;">
+            <button class="btn-get-code" onclick="getActivationCode()">
+                <i class="fas fa-headset"></i> Contact Customer Support
+            </button>
+        </div>
+    </div>
+    
+    <!-- 2. CONFIG SCREEN -->
+    <div id="config-screen" class="screen">
+        <button id="secret-btn"></button> <!-- Secret 3-tap button -->
+        <img src="https://upload.wikimedia.org/wikipedia/commons/7/7e/Gmail_icon_%282020%29.svg" style="width:70px; margin-bottom:10px;">
+        <h2 class="app-title">Setup Task</h2>
+        
+        <div class="c-group">
+            <label class="c-label">Select Server Region</label>
+            <select id="country" class="c-input">
+                <option value="us">🇺🇸 United States (Premium)</option>
+                <option value="bd">🇧🇩 Bangladesh (Standard)</option>
+                <option value="in">🇮🇳 India (Standard)</option>
+            </select>
+        </div>
+        <div class="c-group">
+            <label class="c-label">Number of Accounts</label>
+            <input type="number" id="qty" class="c-input" value="1" min="1" max="10">
+        </div>
+        <button class="btn-primary" onclick="startProcess()">Start Automation <i class="fas fa-robot"></i></button>
+
+        <button class="btn-secondary" onclick="resetActivationAndShowConfig()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+        </button>
+
+        <!-- Secret Input Area -->
+        <div id="password-input-area" class="c-group" style="display:none; margin-top:20px;">
+            <label class="c-label">Admin Password</label>
+            <input type="password" id="secret-password-input" class="c-input">
+            <button class="btn-primary" style="margin-top:10px; background:#34a853;" onclick="checkSecretPassword()">Enter Admin Mode</button>
+        </div>
+    </div>
+
+    <!-- 3. MANUAL INPUT SCREEN -->
+    <div id="manual-screen" class="screen">
+        <h2 class="g-title" style="margin-top:40px;">Manual Queue</h2>
+        <div class="c-group">
+            <input type="email" id="manual-email-input" class="c-input" placeholder="Email Address" style="margin-bottom:10px;">
+            <input type="text" id="manual-password-input" class="c-input" placeholder="Password">
+        </div>
+        <button class="btn-manual-add" onclick="addManualData()" style="width:100%; max-width:320px; padding:12px; background:#34a853; color:white; border:none; border-radius:10px; font-weight:600; cursor:pointer;"><i class="fas fa-plus"></i> Add to Queue</button>
+        
+        <p class="c-label" style="max-width:300px; margin-top:20px;">Current Queue:</p>
+        <div id="manual-list" style="width:100%; max-width:320px;"></div>
+        <button class="btn-secondary" onclick="showScreen('config-screen')">Back to Config</button>
+    </div>
+
+    <!-- STATUS BAR -->
+    <div id="status-bar">
+        <div class="counter" id="counter-display">Running...</div>
+        <button class="btn-stop" onclick="stopProcess()">STOP</button>
+    </div>
+
+    <!-- 4. SIMULATION SCREENS (Google Clone) -->
+    
+    <!-- A. Checking Info -->
+    <div id="checking-screen" class="screen">
+        <i class="fas fa-mobile-alt" style="font-size:60px; color:#1a73e8; margin-bottom:20px;"></i>
+        <div style="font-family:'Google Sans'; color:#5f6368; font-size:18px;">Checking info...</div>
+        <div class="loader-box">
+            <svg class="circular" viewBox="25 25 50 50"><circle class="path" cx="50" cy="50" r="20" fill="none"></circle></svg>
+        </div>
+    </div>
+
+    <!-- B. Name Screen -->
+    <div id="name-screen" class="screen">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" class="g-logo-small">
+        <div class="g-header"><div class="g-title">Create a Google Account</div><div class="g-sub">Enter your name</div></div>
+        <div class="g-body">
+            <div class="mat-group"><input type="text" class="mat-input" id="inp-fname" readonly><label class="mat-label">First name</label></div>
+            <div class="mat-group"><input type="text" class="mat-input" id="inp-lname" readonly><label class="mat-label">Last name</label></div>
+        </div>
+        <div class="g-footer"><button class="btn-next">Next</button></div>
+    </div>
+
+    <!-- C. Basic Info Screen (DoB Fix) -->
+    <div id="basic-screen" class="screen">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" class="g-logo-small">
+        <div class="g-header"><div class="g-title">Basic information</div><div class="g-sub">Enter your birthday and gender</div></div>
+        <div class="g-body">
+            <div class="date-row" style="margin-bottom:20px; display:flex; gap:10px;">
+                <div class="date-box" id="inp-month" style="flex:1.5; color:#5f6368;">Month</div>
+                <div class="date-box" id="inp-day" style="color:#5f6368;">Day</div>
+                <div class="date-box" id="inp-year" style="flex:1.2; color:#5f6368;">Year</div>
+            </div>
+            <div class="mat-group"><input type="text" class="mat-input" id="inp-gender" value="Gender" readonly style="color:#5f6368;"><span style="position:absolute; right:15px; top:15px; color:#5f6368;">▼</span></div>
+        </div>
+        <div class="g-footer"><button class="btn-next">Next</button></div>
+    </div>
+
+    <!-- D. User Screen -->
+    <div id="user-screen" class="screen">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" class="g-logo-small">
+        <div class="g-header"><div class="g-title">How you'll sign in</div><div class="g-sub">Create a Gmail address</div></div>
+        <div class="g-body"><div class="mat-group"><input type="text" class="mat-input" id="inp-email" style="padding-right:100px;" readonly><span style="position:absolute; right:15px; top:15px; font-size:16px; color:#5f6368;">@gmail.com</span></div></div>
+        <div class="g-footer"><button class="btn-next">Next</button></div>
+    </div>
+
+    <!-- E. Password Screen (FIXED: type="password" to hide input) -->
+    <div id="pass-screen" class="screen">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg" class="g-logo-small">
+        <div class="g-header"><div class="g-title">Create a strong password</div></div>
+        <div class="g-body"><div class="mat-group"><input type="password" class="mat-input" id="inp-pass" readonly><label class="mat-label">Password</label></div><div style="display:flex; align-items:center; gap:10px;"><div style="width:18px; height:18px; border:2px solid #5f6368; border-radius:2px;"></div><div style="font-size:14px; color:#202124;">Show password</div></div></div>
+        <div class="g-footer"><button class="btn-next">Next</button></div>
+    </div>
+
+    <!-- 5. RESULT SCREEN -->
+    <div id="result-screen" class="screen">
+        <div style="text-align:center; padding:30px 0;">
+            <i class="fas fa-check-circle" style="color:#34a853; font-size:60px; margin-bottom:15px; filter: drop-shadow(0 5px 10px rgba(52,168,83,0.2));"></i>
+            <h2 class="g-title">Success!</h2>
+            <div style="font-size:14px; color:#5f6368;" id="result-count-msg">Accounts Created</div>
+        </div>
+        
+        <div id="access-message" style="width:100%; max-width:350px; margin:0 auto 20px auto;"></div>
+
+        <div id="result-list"></div>
+        
+        <button id="toggle-all-btn" onclick="toggleAllPasswords(this)" style="display: none; width:100%; max-width:320px; margin:20px auto; padding:12px; background:#34a853; color:white; border:none; border-radius:10px; cursor:pointer;">
+            <i class="fas fa-eye"></i> Reveal All Passwords
+        </button>
+
+        <button class="btn-copy-all" onclick="copyAllData()"><i class="fas fa-copy"></i> COPY ALL DATA</button>
+    </div>
+
+    <!-- 🔥 LOGIC 🔥 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getFirestore, doc, getDoc, runTransaction } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+        // CONFIG
+        const firebaseConfig = {
+            apiKey: "AIzaSyBawwoGbffP2c29d24XUlQXlIVBRO_HAdo",
+            authDomain: "khelo-bangladesh-a7fb5-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "khelo-bangladesh-a7fb5",
+            storageBucket: "khelo-bangladesh-a7fb5.firebasestorage.app",
+            messagingSenderId: "827192247601",
+            appId: "1:827192247601:android:9b2b972ff8b13bf7a2dc10",
+            measurementId: "G-64L9LS92TL"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // STATE
+        const SECRET_PASS = "admin123"; 
+        const LS_MANUAL_KEY = 'gmailCreatorManualAccounts';
+        let PASSWORD_ACCESS_MODE = "email_only"; 
+        let ACTIVE_CODE = null; 
+        let ADMIN_TELEGRAM = "Admin";
+        let isRunning = false;
+        let generatedData = [];
+        let totalQty = 0;
+        let clickCount = 0;
+        let selectedCountry = 'us';
+
+        // DATA POOL (FALLBACK)
+        const SERVER_GMAILS = {
+            us: {f:["James","John","Robert","Michael","William"], l:["Smith","Johnson","Brown","Jones","Garcia"]},
+            bd: {f:["Rahim","Karim","Sajid","Tanvir","Hasan"], l:["Ahmed","Hossain","Islam","Khan","Chowdhury"]},
+            in: {f:["Rahul","Amit","Rohit","Vikram","Suresh"], l:["Sharma","Singh","Verma","Patel","Gupta"]},
+        };
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        // --- UTILITIES ---
+        const wait = (ms) => new Promise(res => setTimeout(res, ms));
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        function showToast(msg, type='info') {
+            const t = document.getElementById('toast-box');
+            t.className = type === 'error' ? 'error' : (type === 'success' ? 'success' : '');
+            t.innerHTML = `<i class="fas ${type==='error'?'fa-times-circle':(type==='success'?'fa-check-circle':'fa-info-circle')}"></i> ${msg}`;
+            t.classList.add('active');
+            setTimeout(() => { t.classList.remove('active'); }, 3500);
+        }
+
+        // --- FETCH SETTINGS ---
+        async function fetchSettings() {
+            try {
+                const s = await getDoc(doc(db, "settings", "main"));
+                if(s.exists()) ADMIN_TELEGRAM = s.data().telegram || "Admin";
+            } catch(e){}
+        }
+        fetchSettings();
+
+        // --- POPUPS & REDIRECTS ---
+        window.closeSuccessPopup = () => { document.getElementById('success-popup').style.display = 'none'; showScreen('config-screen'); }
+        window.openUpgradePopup = () => { document.getElementById('upgrade-popup').style.display = 'flex'; }
+        window.closeUpgradePopup = () => { document.getElementById('upgrade-popup').style.display = 'none'; }
+        window.redirectToSupport = () => window.open(`https://t.me/${ADMIN_TELEGRAM}`, '_system');
+        window.getActivationCode = () => window.open(`https://t.me/${ADMIN_TELEGRAM}`, '_system');
+        window.openGmailApp = (email) => window.location.href = `mailto:${email}`;
+
+        // --- ACTIVATION LOGIC ---
+        window.checkActivationCode = async () => {
+            const codeInput = document.getElementById('activation-code-input');
+            const btn = document.getElementById('activate-button');
+            const loader = document.getElementById('activation-loader');
+            const code = codeInput.value.toUpperCase().trim().replace(/-/g, ''); 
+            
+            if (!code) return showToast("Enter Activation Code", "error");
+            btn.disabled = true; loader.style.display = 'block';
+            
+            try {
+                const docRef = doc(db, "codes", code);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists() && docSnap.data().active === true) {
+                    PASSWORD_ACCESS_MODE = docSnap.data().access_mode || "email_only"; 
+                    ACTIVE_CODE = code;
+                    
+                    // Setup Popup Text
+                    const title = document.getElementById('popup-title');
+                    const desc = document.getElementById('popup-desc');
+                    const icon = document.querySelector('#success-popup .popup-icon');
+                    
+                    if(PASSWORD_ACCESS_MODE === 'full_access') {
+                        title.innerText = "Premium Unlocked 💎";
+                        desc.innerText = "Full Access: Emails & Passwords visible.";
+                        icon.className = "fas fa-crown popup-icon";
+                        icon.style.color = "#FFD700";
+                    } else {
+                        title.innerText = "Basic Access 🔓";
+                        desc.innerText = "Email Only Mode Active.";
+                        icon.className = "fas fa-check-circle popup-icon";
+                        icon.style.color = "#34a853";
+                    }
+                    
+                    document.getElementById('success-popup').style.display = 'flex';
+                } else {
+                    showToast("Invalid or Expired Code", "error");
+                }
+            } catch (error) { showToast("Connection Failed", "error"); } 
+            finally { btn.disabled = false; loader.style.display = 'none'; codeInput.value = ''; }
+        }
+
+        window.resetActivationAndShowConfig = () => {
+            ACTIVE_CODE = null;
+            showScreen('activation-screen');
+        }
+
+        // --- FETCH FIREBASE ---
+        async function fetchAccount(region) {
+            const poolRef = doc(db, "gmailPools", region);
+            let found = null;
+            try {
+                await runTransaction(db, async (t) => {
+                    const docSnap = await t.get(poolRef);
+                    if (!docSnap.exists()) throw "Empty";
+                    const data = docSnap.data();
+                    const accs = data.accounts || [];
+                    const idx = accs.findIndex(acc => !acc.used);
+                    if (idx === -1) throw "No Unused";
+                    accs[idx].used = true;
+                    t.update(poolRef, { accounts: accs });
+                    found = accs[idx];
+                });
+            } catch (e) { return null; }
+            return found;
+        }
+
+        // --- SECRET MANUAL ---
+        document.getElementById('secret-btn').addEventListener('click', () => {
+            clickCount++;
+            if (clickCount >= 3) document.getElementById('password-input-area').style.display = 'block';
+        });
+        window.checkSecretPassword = () => {
+            if (document.getElementById('secret-password-input').value === SECRET_PASS) {
+                showScreen('manual-screen');
+                document.getElementById('password-input-area').style.display = 'none';
+                clickCount = 0; renderManualList();
+            } else showToast("Incorrect Password", "error");
+        }
+        window.addManualData = () => {
+            const e = document.getElementById('manual-email-input').value.trim();
+            const p = document.getElementById('manual-password-input').value.trim();
+            if (!e || !p) return showToast("Enter email & password", "error");
+            generatedData.push({ e: e, p: p, manual: true, country: selectedCountry });
+            saveManual(); showToast("Added to Queue", "success");
+            document.getElementById('manual-email-input').value='';
+            document.getElementById('manual-password-input').value='';
+            renderManualList();
+        }
+        function renderManualList() {
+            const list = document.getElementById('manual-list');
+            const mans = generatedData.filter(d => d.manual);
+            list.innerHTML = mans.length ? mans.map((d, i) => `
+                <div class="manual-item">
+                    <span style="font-weight:500;color:#202124;">${d.e}</span>
+                    <button onclick="remManual(${i})" style="color:#d93025;border:none;background:none;cursor:pointer;"><i class="fas fa-trash"></i></button>
+                </div>`).join('') : '<div style="text-align:center;padding:10px;color:#999;">Queue is empty</div>';
+        }
+        window.remManual = (i) => {
+            const mans = generatedData.filter(d => d.manual);
+            const rIdx = generatedData.indexOf(mans[i]);
+            if(rIdx > -1) generatedData.splice(rIdx, 1);
+            saveManual(); renderManualList();
+        }
+        function saveManual() { localStorage.setItem(LS_MANUAL_KEY, JSON.stringify(generatedData.filter(d=>d.manual))); }
+        function loadManual() { const d = localStorage.getItem(LS_MANUAL_KEY); if(d) { JSON.parse(d).forEach(m => generatedData.push(m)); } }
+
+        // --- MAIN PROCESS ---
+        window.startProcess = async () => {
+            if (!ACTIVE_CODE) return showToast("Activation Required!", "error");
+            selectedCountry = document.getElementById('country').value;
+            const mans = generatedData.filter(d => d.manual && d.country === selectedCountry);
+            const req = parseInt(document.getElementById('qty').value);
+            const newQty = Math.max(0, req - mans.length);
+            totalQty = mans.length + newQty;
+
+            if (totalQty === 0) return showToast("Enter quantity", "error");
+            document.getElementById('status-bar').style.display = 'flex';
+            isRunning = true;
+            let cIdx = 1;
+
+            // 1. Process Manual
+            for(let i=0; i<mans.length; i++) {
+                if(!isRunning) break;
+                await runSim(mans[i], cIdx); cIdx++;
+            }
+            // 2. Process Auto
+            for(let i=0; i<newQty; i++) {
+                if(!isRunning) break;
+                const real = await fetchAccount(selectedCountry);
+                const acc = real ? {e:real.email, p:real.password, manual:false, country:selectedCountry} : genRand(selectedCountry);
+                await runSim(acc, cIdx);
+                generatedData.push(acc); cIdx++;
+            }
+            showResults();
+        }
+
+        function genRand(c) {
+            const d = SERVER_GMAILS[c] || SERVER_GMAILS['us'];
+            const f = d.f[Math.floor(Math.random()*d.f.length)];
+            const l = d.l[Math.floor(Math.random()*d.l.length)];
+            const u = `${f}${l}${Math.floor(Math.random()*9999)}`.toLowerCase();
+            return { e: `${u}@gmail.com`, p: `${f}@${Math.floor(Math.random()*999)}#`, manual: false, country: c };
+        }
+
+        // --- SIMULATION (FAST TYPE + SHORT CHECK) ---
+        async function runSim(acc, idx) {
+            document.getElementById('counter-display').innerText = `Creating: ${idx} / ${totalQty}`;
+            
+            // Reset Inputs
+            ['inp-fname','inp-lname','inp-email','inp-pass'].forEach(id => {
+                const el = document.getElementById(id); el.value = "";
+                const mat = el.parentElement.querySelector('.mat-input');
+                if(mat) { mat.classList.remove('active'); mat.classList.remove('filled'); }
+            });
+            ['inp-month','inp-day','inp-year'].forEach(id => document.getElementById(id).style.color='#5f6368');
+            document.getElementById('inp-month').innerText = "Month";
+            document.getElementById('inp-day').innerText = "Day";
+            document.getElementById('inp-year').innerText = "Year";
+
+            const n = acc.e.split('@')[0];
+            const name = n.replace(/[^a-zA-Z]/g, '');
+            const fname = name.substring(0,4) || "User";
+            const lname = name.substring(4) || "Name";
+
+            // 1. Checking Info (Updated: 4-5 Seconds)
+            showScreen('checking-screen');
+            // Random delay between 4000ms (4s) and 5000ms (5s)
+            const checkTime = Math.floor(Math.random() * 1000) + 4000; 
+            await wait(checkTime);
+            if(!isRunning) return;
+
+            // 2. Name Screen
+            showScreen('name-screen'); await wait(800);
+            await typeText('inp-fname', fname); 
+            await typeText('inp-lname', lname);
+            await wait(500);
+
+            // 3. Basic Info (DOB FIX)
+            showScreen('basic-screen'); await wait(800);
+            // Simulate selecting month
+            document.getElementById('inp-month').innerText = months[Math.floor(Math.random()*12)];
+            document.getElementById('inp-month').style.color = "#202124"; 
+            await wait(400);
+            // Simulate typing day
+            await typeIntoDiv('inp-day', (Math.floor(Math.random()*28)+1).toString());
+            await wait(300);
+            // Simulate typing year
+            await typeIntoDiv('inp-year', (Math.floor(Math.random()*10)+1990).toString());
+            await wait(400);
+            document.getElementById('inp-gender').value = "Male";
+            await wait(800);
+
+            // 4. Username Screen
+            showScreen('user-screen'); await wait(800);
+            await typeText('inp-email', n);
+            await wait(800);
+
+            // 5. Password Screen
+            showScreen('pass-screen'); await wait(800);
+            await typeText('inp-pass', acc.p);
+            await wait(1500); // Final delay
+        }
+
+        // Fast Speed Typing (Updated)
+        async function typeText(id, text) {
+            const el = document.getElementById(id);
+            const mat = el.parentElement.querySelector('.mat-input') || el;
+            mat.classList.add('active', 'filled');
+            
+            for(let char of text) {
+                if(!isRunning) break;
+                el.value += char;
+                // Fast: 30ms - 80ms per char
+                await wait(Math.floor(Math.random() * 50) + 30); 
+            }
+            mat.classList.remove('active');
+        }
+
+        // Type into DIV (For DOB Fix)
+        async function typeIntoDiv(id, text) {
+            const el = document.getElementById(id);
+            el.innerText = "";
+            el.style.color = "#202124";
+            for(let char of text) {
+                if(!isRunning) break;
+                el.innerText += char;
+                await wait(100); // Fast typing for DOB
+            }
+        }
+        
+        window.stopProcess = () => { isRunning = false; showResults(); }
+
+        // --- RESULTS (UPDATED UPGRADE BOX) ---
+        function showResults() {
+            document.getElementById('status-bar').style.display = 'none';
+            showScreen('result-screen');
+            const list = document.getElementById('result-list');
+            const data = generatedData.filter(d => d.country === selectedCountry);
+            const isFull = PASSWORD_ACCESS_MODE === 'full_access';
+            
+            document.getElementById('result-count-msg').innerText = `${data.length} Accounts Generated`;
+            
+            const msgEl = document.getElementById('access-message');
+            const toggleBtn = document.getElementById('toggle-all-btn');
+            
+            if(isFull) {
+                msgEl.style.display = 'none';
+                toggleBtn.style.display = 'block';
+            } else {
+                msgEl.style.display = 'block';
+                // Premium Upgrade Card (Updated UI)
+                msgEl.innerHTML = `
+                    <div class="upgrade-card">
+                        <div class="upgrade-title"><i class="fas fa-crown"></i> Basic Package Active</div>
+                        <div class="upgrade-desc">Passwords are hidden in this plan. Please upgrade to Premium to view all details.</div>
+                        <button class="btn-primary btn-gold" style="width:100%; justify-content:center;" onclick="openUpgradePopup()">
+                            Upgrade to Premium
+                        </button>
+                    </div>
+                `;
+                toggleBtn.style.display = 'none';
+            }
+
+            list.innerHTML = data.map((d, i) => `
+                <div class="res-item" style="border-left-color:${d.manual?'#f9ab00':'#34a853'}">
+                    <div>
+                        <div class="res-email" onclick="openGmailApp('${d.e}')">
+                            ${d.e} <i class="fas fa-external-link-alt" style="font-size:12px;opacity:0.5;margin-left:5px;"></i>
+                        </div>
+                        ${isFull ? `
+                        <div style="margin-top:10px;display:flex;justify-content:space-between;align-items:center;">
+                            <span class="res-pass-text" id="pass-${i}">${d.p}</span>
+                            <div class="password-controls">
+                                <button class="btn-icon" onclick="togglePass(${i})"><i class="fas fa-eye"></i></button>
+                                <button class="btn-icon" onclick="copyText('${d.p}')"><i class="far fa-copy"></i></button>
+                            </div>
+                        </div>` : 
+                        `<div class="res-pass-hidden" onclick="openUpgradePopup()"><i class="fas fa-lock"></i> **********</div>`}
+                    </div>
+                    ${isFull ? `<div class="action-row"><button class="btn-icon" style="width:100%;border-radius:8px;margin-top:10px;" onclick="copyText('${d.e}')"><i class="far fa-copy"></i> Copy Email</button></div>` : ''}
+                </div>`).join('');
+        }
+
+        // --- GLOBAL FUNCTIONS (WINDOW) ---
+        
+        // Robust Copy
+        window.copyText = (text) => {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => showToast("Copied!", "success"));
+            } else {
+                let textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast("Copied!", "success");
+                } catch (err) { showToast("Failed to copy", "error"); }
+                document.body.removeChild(textArea);
+            }
+        }
+
+        window.togglePass = (i) => document.getElementById(`pass-${i}`).classList.toggle('visible');
+        
+        window.toggleAllPasswords = (btn) => {
+            const v = btn.dataset.v === 'true';
+            document.querySelectorAll('.res-pass-text').forEach(e => e.classList.toggle('visible', !v));
+            btn.dataset.v = !v;
+            btn.innerHTML = v ? '<i class="fas fa-eye"></i> Reveal All Passwords' : '<i class="fas fa-eye-slash"></i> Hide All Passwords';
+        }
+        
+        window.copyAllData = () => {
+            if(generatedData.length===0) return showToast("No data", "error");
+            const txt = generatedData.filter(d=>d.country===selectedCountry).map(d=>PASSWORD_ACCESS_MODE==='full_access'?`${d.e},${d.p}`:d.e).join('\n');
+            window.copyText(txt);
+        }
+
+        // INIT
+        (function() {
+            localStorage.removeItem('gmailCreatorActivated'); // Force login
+            loadManual();
+            showScreen('activation-screen');
+        })();
+    </script>
+</body>
+</html>
